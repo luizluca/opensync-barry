@@ -48,7 +48,7 @@ typedef Barry::vSmartPtr<OSyncList, OSyncList, &osync_list_free> AutoOSyncList;
 extern "C" {
 	BXEXPORT int get_version(void);
 	static void *initialize(OSyncPlugin *plugin, OSyncPluginInfo *info, OSyncError **error);
-	static osync_bool discover(OSyncPluginInfo *info, void *userdata, OSyncError **error);
+	static osync_bool discover(OSyncPlugin *plugin, OSyncPluginInfo *info, void *userdata, OSyncError **error);
 
 	static void contact_get_changes(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, osync_bool slow_sync, void *userdata);
 	static void contact_sync_done(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, void *userdata);
@@ -65,7 +65,7 @@ extern "C" {
 	static void connect(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, void *userdata);
 	static void disconnect(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, void *userdata);
 	static void commit_change(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncContext *ctx, OSyncChange *change, void *userdata);
-	static void finalize(void *userdata);
+	static void finalize(OSyncPlugin *plugin, void *userdata);
 	BXEXPORT osync_bool get_sync_info(OSyncPluginEnv *env, OSyncError **error);
 }
 
@@ -662,7 +662,7 @@ static void *initialize(OSyncPlugin *plugin, OSyncPluginInfo *info, OSyncError *
 }
 
 
-static osync_bool discover(OSyncPluginInfo *info, void *userdata, OSyncError **error)
+static osync_bool discover(OSyncPlugin* plugin, OSyncPluginInfo* info, void* userdata, OSyncError** error)
 {
 	Trace trace("discover");
 
@@ -1077,11 +1077,11 @@ static void disconnect(OSyncObjTypeSink *sink, OSyncPluginInfo *info, OSyncConte
 }
 
 
-static void finalize(void *data)
+static void finalize(OSyncPlugin* plugin, void* userdata)
 {
 	Trace trace("finalize");
 
-	BarryEnvironment *env = (BarryEnvironment *) data;
+	BarryEnvironment *env = (BarryEnvironment *) userdata;
 
 	// Disconnect the controller, which closes our connection
 	if (env->isConnected())
